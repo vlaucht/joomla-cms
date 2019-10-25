@@ -84,6 +84,16 @@ jQuery(document).ready(function() {
 				</div>
 			</div>
 
+			<?php
+			// start the session
+			session_start();
+			// form token
+			$form_token = uniqid();
+
+			// create form token session variable and store generated id in it.
+			$_SESSION['form_token'] = $form_token;
+			?>
+			<input type="hidden" name="token" value="<?php echo $form_token; ?>" />
 			<input type="hidden" name="task" value="" />
 			<?php echo JHtml::_('form.token'); ?>
 		</fieldset>

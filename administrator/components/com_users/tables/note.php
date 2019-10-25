@@ -27,6 +27,7 @@ class UsersTableNote extends JTable
 	 */
 	public function __construct(&$db)
 	{
+		echo "Test3";
 		parent::__construct('#__user_notes', 'id', $db);
 
 		$this->setColumnAlias('published', 'state');
@@ -45,6 +46,7 @@ class UsersTableNote extends JTable
 	 */
 	public function store($updateNulls = false)
 	{
+		echo "Test1";
 		$date = JFactory::getDate()->toSql();
 		$userId = JFactory::getUser()->get('id');
 
@@ -83,6 +85,7 @@ class UsersTableNote extends JTable
 	 */
 	public function publish($pks = null, $state = 1, $userId = 0)
 	{
+		echo "Test2";
 		$k = $this->_tbl_key;
 
 		// Sanitize input.
