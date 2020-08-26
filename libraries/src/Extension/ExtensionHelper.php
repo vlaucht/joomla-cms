@@ -248,6 +248,7 @@ class ExtensionHelper
 		array('plugin', 'crop', 'media-action', 0),
 		array('plugin', 'resize', 'media-action', 0),
 		array('plugin', 'rotate', 'media-action', 0),
+		array('plugin', 'text', 'media-action', 0),
 
 		// Core plugin extensions - privacy
 		array('plugin', 'actionlogs', 'privacy', 0),
