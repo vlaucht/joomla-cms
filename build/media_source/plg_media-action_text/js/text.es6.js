@@ -10,101 +10,133 @@ Joomla.MediaManager.Edit = Joomla.MediaManager.Edit || {};
 (() => {
   'use strict';
 
-  // Update image
-  const resize = (width, height) => {
-    // The image element
-    const image = document.getElementById('image-source');
+  let active = false;
+  let currentX;
+  let currentY;
+  let initialX = 50;
+  let initialY = 0;
+  let xOffset = 0;
+  let yOffset = 0;
+  let dragItem;
+  let container;
+  let text;
 
-    // The canvas where we will resize the image
+  const render = () => {
     const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    canvas.getContext('2d').drawImage(image, 0, 0, width, height);
 
-    // The format
-    const format = Joomla.MediaManager.Edit.original.extension === 'jpg' ? 'jpeg' : Joomla.MediaManager.Edit.original.extension;
+    const image = document.getElementById('image-source');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0);
+    ctx.fillStyle = 'white';
+    ctx.textBaseline = 'middle';
+    ctx.font = "50px 'Montserrat'";
+    initialX = initialX || canvas.width;
 
-    // The quality
-    const quality = document.getElementById('jform_resize_quality').value;
-
-    // Creating the data from the canvas
-    Joomla.MediaManager.Edit.current.contents = canvas.toDataURL(`image/${format}`, quality);
-
-    // Updating the preview element
+    ctx.fillText(text, initialX, initialY);
+    const format = Joomla.MediaManager.Edit.original.extension === 'jpg' ? 'jpeg' : 'jpg';
+    Joomla.MediaManager.Edit.current.contents = canvas.toDataURL(`image/${format}`);
     const preview = document.getElementById('image-preview');
-    preview.width = width;
-    preview.height = height;
+    preview.width = canvas.width;
+    preview.height = canvas.height;
     preview.src = Joomla.MediaManager.Edit.current.contents;
-
-    // Update the width input box
-    document.getElementById('jform_resize_width').value = parseInt(width, 10);
-
-    // Update the height input box
-    document.getElementById('jform_resize_height').value = parseInt(height, 10);
-
-    // Notify the app that a change has been made
     window.dispatchEvent(new Event('mediaManager.history.point'));
+  }
+
+  const dragStart = (e) => {
+    if (e.type === 'touchstart') {
+      initialX = e.touches[0].clientX - xOffset;
+      initialY = e.touches[0].clientY - yOffset;
+    } else {
+      initialX = e.clientX - xOffset;
+      initialY = e.clientY - yOffset;
+    }
+
+    if (e.target === dragItem) {
+      active = true;
+    }
   };
 
-  const initResize = () => {
+  const dragEnd = () => {
+    initialX = currentX;
+    initialY = currentY;
+
+    active = false;
+    render();
+  };
+
+  const setTranslate = (xPos, yPos, el) => {
+    el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+  };
+
+  const drag = (e) => {
+    if (active) {
+      e.preventDefault();
+
+      if (e.type === 'touchmove') {
+        currentX = e.touches[0].clientX - initialX;
+        currentY = e.touches[0].clientY - initialY;
+      } else {
+        currentX = e.clientX - initialX;
+        currentY = e.clientY - initialY;
+      }
+
+      xOffset = currentX;
+      yOffset = currentY;
+
+      setTranslate(currentX, currentY, dragItem);
+    }
+  };
+
+  const createText = () => {
+    if (dragItem) {
+      return dragItem;
+    }
+    dragItem = document.createElement('div');
+    dragItem.setAttribute('style', 'height: 50px; width: 50px; border: 1px solid red; position: absolute; z-index: 999');
+    dragItem.setAttribute('draggable', true);
+    container = document.getElementById('media-manager-edit-container');
+    container.addEventListener('touchstart', dragStart, false);
+    container.addEventListener('touchend', dragEnd, false);
+    container.addEventListener('touchmove', drag, false);
+    container.addEventListener('mousedown', dragStart, false);
+    container.addEventListener('mouseup', dragEnd, false);
+    container.addEventListener('mousemove', drag, false);
+    container.append(dragItem);
+    const textEl = document.createElement('p');
+    textEl.id = 'text';
+    dragItem.append(textEl);
+    return dragItem;
+  };
+
+  const write = (e) => {
+    text = e;
+    createText();
+    document.getElementById('text').textContent = text;
+    render();
+  };
+
+
+
+
+
+  const initRotate = () => {
     const funct = () => {
-      const image = document.getElementById('image-source');
-
-      const resizeWidthInputBox = document.getElementById('jform_resize_width');
-      const resizeHeightInputBox = document.getElementById('jform_resize_height');
-
-      // Update the input boxes
-      resizeWidthInputBox.value = image.width;
-      resizeHeightInputBox.value = image.height;
-
-      // The listeners
-      resizeWidthInputBox.addEventListener('change', ({ target }) => {
-        resize(
-          parseInt(target.value, 10),
-          parseInt(target.value, 10) / (image.width / image.height),
-        );
-      });
-      resizeHeightInputBox.addEventListener('change', ({ target }) => {
-        resize(
-          parseInt(target.value, 10) * (image.width / image.height),
-          parseInt(target.value, 10),
-        );
-      });
-
-      // Set the values for the range fields
-      const resizeWidth = document.getElementById('jform_resize_w');
-      const resizeHeight = document.getElementById('jform_resize_h');
-
-      resizeWidth.min = 0;
-      resizeWidth.max = image.width;
-      resizeWidth.value = image.width;
-
-      resizeHeight.min = 0;
-      resizeHeight.max = image.height;
-      resizeHeight.value = image.height;
-
-      // The listeners
-      resizeWidth.addEventListener('input', ({ target }) => {
-        resize(
-          parseInt(target.value, 10),
-          parseInt(target.value, 10) / (image.width / image.height),
-        );
-      });
-      resizeHeight.addEventListener('input', ({ target }) => {
-        resize(
-          parseInt(target.value, 10) * (image.width / image.height),
-          parseInt(target.value, 10),
-        );
+      // The number input listener
+      document.getElementById('jform_addText').addEventListener('input', ({ target }) => {
+        write(target.value);
       });
     };
     setTimeout(funct, 1000);
   };
 
-  // Register the Events
-  Joomla.MediaManager.Edit.resize = {
+  Joomla.MediaManager.Edit.text = {
     Activate(mediaData) {
       // Initialize
-      initResize(mediaData);
+      console.log('init');
+      initRotate(mediaData);
+
     },
     Deactivate() {
     },

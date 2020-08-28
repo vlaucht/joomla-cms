@@ -10,7 +10,6 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
-
 /**
  * Media Manager Text Action
  *
@@ -18,4 +17,19 @@ use Joomla\CMS\Factory;
  */
 class PlgMediaActionText extends \Joomla\Component\Media\Administrator\Plugin\MediaActionPlugin
 {
+	public function onInit($form)
+	{
+		$field = $form->getField('fontFamily');
+		$fonts = $this->getFonts();
+		foreach ($fonts as $font)
+		{
+			$field->addOption($font['name'], ['value' => $font['name']]);
+		}
+	}
+
+
+	protected function getFonts()
+	{
+		return json_decode(file_get_contents(__DIR__ . '/fonts.json'), true);
+	}
 }

@@ -50,6 +50,7 @@ class MediaActionPlugin extends CMSPlugin
 			return;
 		}
 
+
 		$this->loadCss();
 		$this->loadJs();
 
@@ -60,7 +61,9 @@ class MediaActionPlugin extends CMSPlugin
 		if (file_exists($paramsFile))
 		{
 			$form->loadFile($paramsFile);
+			$this->onInit($form);
 		}
+
 	}
 
 	/**
@@ -94,4 +97,10 @@ class MediaActionPlugin extends CMSPlugin
 			['version' => 'auto', 'relative' => true]
 		);
 	}
+
+	protected function onInit($form)
+	{
+
+	}
+
 }

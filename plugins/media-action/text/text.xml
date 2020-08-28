@@ -10,7 +10,7 @@
 	<version>4.0.0</version>
 	<description>PLG_MEDIA-ACTION_TEXT_XML_DESCRIPTION</description>
 	<files>
-		<filename plugin="crop">text.php</filename>
+		<filename plugin="text">text.php</filename>
 		<folder>form</folder>
 	</files>
 	<languages>
